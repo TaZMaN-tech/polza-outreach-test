@@ -1,66 +1,66 @@
-# Telegram Sender - Documentation
+# Telegram Sender - Документация
 
-Production-ready tool for sending text files to Telegram chats via Bot API.
+Production-ready инструмент для отправки текстовых файлов в Telegram чаты через Bot API.
 
-## Features
+## Возможности
 
-- ✅ Read text files (UTF-8)
-- ✅ Send to private/group/channel chats
-- ✅ Bot token validation
-- ✅ HTTP timeout protection
-- ✅ Error handling (network, API, file errors)
-- ✅ Session reuse (requests.Session)
-- ✅ Environment variable support
-- ✅ Markdown/HTML formatting support
-- ✅ Logging (INFO/ERROR)
+- ✅ Чтение текстовых файлов (UTF-8)
+- ✅ Отправка в приватные/групповые чаты/каналы
+- ✅ Валидация токена бота
+- ✅ Защита от HTTP таймаутов
+- ✅ Обработка ошибок (сеть, API, файлы)
+- ✅ Переиспользование сессий (requests.Session)
+- ✅ Поддержка переменных окружения
+- ✅ Поддержка форматирования Markdown/HTML
+- ✅ Логирование (INFO/ERROR)
 
 ---
 
-## Installation
+## Установка
 
 ```bash
-# Install dependencies
+# Установка зависимостей
 pip3 install -r requirements.txt
 ```
 
 ---
 
-## Setup Telegram Bot
+## Настройка Telegram бота
 
-### 1. Create Bot with @BotFather
+### 1. Создание бота через @BotFather
 
-1. Open Telegram and search for **@BotFather**
-2. Send `/newbot` command
-3. Follow instructions to choose bot name and username
-4. **Save the bot token** (looks like `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
+1. Откройте Telegram и найдите **@BotFather**
+2. Отправьте команду `/newbot`
+3. Следуйте инструкциям для выбора имени и username бота
+4. **Сохраните токен бота** (выглядит как `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
 
-### 2. Get Chat ID
+### 2. Получение Chat ID
 
-#### Option A: For Private Chat (Direct Message)
+#### Вариант A: Для приватного чата (личное сообщение)
 
-1. Send any message to your bot
-2. Visit: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
-3. Find `"chat":{"id":123456789}` in the response
-4. Use this number as `CHAT_ID`
+1. Отправьте любое сообщение вашему боту
+2. Откройте: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+3. Найдите `"chat":{"id":123456789}` в ответе
+4. Используйте это число как `CHAT_ID`
 
-#### Option B: For Group/Channel
+#### Вариант B: Для группы/канала
 
-1. Add bot to your group/channel
-2. Send a message in the group
-3. Visit: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
-4. Find `"chat":{"id":-100123456789}` (note the minus sign)
-5. Use this number (with minus) as `CHAT_ID`
+1. Добавьте бота в вашу группу/канал
+2. Отправьте сообщение в группе
+3. Откройте: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+4. Найдите `"chat":{"id":-100123456789}` (обратите внимание на минус)
+5. Используйте это число (с минусом) как `CHAT_ID`
 
-#### Option C: Using a Bot (easier)
+#### Вариант C: Использование бота (проще)
 
-1. Add **@userinfobot** to your chat
-2. It will show you the chat ID immediately
+1. Добавьте **@userinfobot** в ваш чат
+2. Он сразу покажет вам chat ID
 
 ---
 
-## Usage
+## Использование
 
-### Basic Usage
+### Базовое использование
 
 ```bash
 python3 -m src.telegram.telegram_sender \
@@ -69,18 +69,18 @@ python3 -m src.telegram.telegram_sender \
   --chat "123456789"
 ```
 
-### Using Environment Variables (Recommended)
+### Использование переменных окружения (рекомендуется)
 
 ```bash
-# Set credentials once
+# Установить учётные данные один раз
 export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
 export TELEGRAM_CHAT_ID="123456789"
 
-# Send message
+# Отправить сообщение
 python3 -m src.telegram.telegram_sender --file message.txt
 ```
 
-### With Markdown Formatting
+### С форматированием Markdown
 
 ```bash
 python3 -m src.telegram.telegram_sender \
@@ -88,7 +88,7 @@ python3 -m src.telegram.telegram_sender \
   --parse-mode Markdown
 ```
 
-### Test Bot Connection
+### Тест подключения к боту
 
 ```bash
 python3 -m src.telegram.telegram_sender \
@@ -98,30 +98,30 @@ python3 -m src.telegram.telegram_sender \
 
 ---
 
-## CLI Arguments
+## Аргументы CLI
 
-| Argument | Description | Required | Alternative |
-|----------|-------------|----------|-------------|
-| `--file` | Path to text file | Yes (for sending) | - |
-| `--token` | Bot token from @BotFather | Yes | `TELEGRAM_BOT_TOKEN` env var |
-| `--chat` | Chat ID | Yes (for sending) | `TELEGRAM_CHAT_ID` env var |
-| `--parse-mode` | Message format (Markdown/HTML) | No | - |
-| `--test` | Test bot token only | No | - |
-| `--timeout` | HTTP timeout in seconds | No (default: 10) | - |
+| Аргумент | Описание | Обязательный | Альтернатива |
+|----------|----------|--------------|--------------|
+| `--file` | Путь к текстовому файлу | Да (для отправки) | - |
+| `--token` | Токен бота от @BotFather | Да | Переменная окружения `TELEGRAM_BOT_TOKEN` |
+| `--chat` | Chat ID | Да (для отправки) | Переменная окружения `TELEGRAM_CHAT_ID` |
+| `--parse-mode` | Формат сообщения (Markdown/HTML) | Нет | - |
+| `--test` | Только тест токена бота | Нет | - |
+| `--timeout` | HTTP таймаут в секундах | Нет (по умолчанию: 10) | - |
 
 ---
 
-## Examples
+## Примеры
 
-### Example 1: Send Simple Message
+### Пример 1: Отправка простого сообщения
 
-**Create file `message.txt`:**
+**Создайте файл `message.txt`:**
 ```
 Hello from Telegram Bot!
 This is a test message.
 ```
 
-**Send:**
+**Отправка:**
 ```bash
 python3 -m src.telegram.telegram_sender \
   --file message.txt \
@@ -129,7 +129,7 @@ python3 -m src.telegram.telegram_sender \
   --chat "YOUR_CHAT_ID"
 ```
 
-**Expected output:**
+**Ожидаемый вывод:**
 ```
 ✅ Message sent successfully to chat 123456789
    File: message.txt
@@ -138,9 +138,9 @@ python3 -m src.telegram.telegram_sender \
 
 ---
 
-### Example 2: Send with Markdown
+### Пример 2: Отправка с Markdown
 
-**Create file `formatted.txt`:**
+**Создайте файл `formatted.txt`:**
 ```
 *Bold text*
 _Italic text_
@@ -148,7 +148,7 @@ _Italic text_
 [Link](https://example.com)
 ```
 
-**Send:**
+**Отправка:**
 ```bash
 python3 -m src.telegram.telegram_sender \
   --file formatted.txt \
@@ -159,7 +159,7 @@ python3 -m src.telegram.telegram_sender \
 
 ---
 
-### Example 3: Test Bot Token
+### Пример 3: Тест токена бота
 
 ```bash
 python3 -m src.telegram.telegram_sender \
@@ -167,127 +167,127 @@ python3 -m src.telegram.telegram_sender \
   --token "123456:ABC-DEF..."
 ```
 
-**Expected output (success):**
+**Ожидаемый вывод (успех):**
 ```
 ✅ Bot token is valid. Connection test successful.
 ```
 
-**Expected output (error):**
+**Ожидаемый вывод (ошибка):**
 ```
 ❌ Connection test failed: Unauthorized
 ```
 
 ---
 
-### Example 4: Using Environment Variables
+### Пример 4: Использование переменных окружения
 
-**Setup (add to `~/.bashrc` or `~/.zshrc`):**
+**Настройка (добавьте в `~/.bashrc` или `~/.zshrc`):**
 ```bash
 export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
 export TELEGRAM_CHAT_ID="123456789"
 ```
 
-**Usage:**
+**Использование:**
 ```bash
-# Reload shell
+# Перезагрузить shell
 source ~/.bashrc
 
-# Send without credentials in command
+# Отправка без учётных данных в команде
 python3 -m src.telegram.telegram_sender --file message.txt
 ```
 
 ---
 
-## Error Handling
+## Обработка ошибок
 
-### Error: File not found
+### Ошибка: Файл не найден
 
 ```
 ❌ File error: File not found: message.txt
 ```
 
-**Solution:** Check file path is correct
+**Решение:** Проверьте, что путь к файлу правильный
 
 ---
 
-### Error: Empty file
+### Ошибка: Пустой файл
 
 ```
 ❌ File is empty or contains only whitespace
 ```
 
-**Solution:** Add content to the file
+**Решение:** Добавьте содержимое в файл
 
 ---
 
-### Error: Invalid bot token
+### Ошибка: Неверный токен бота
 
 ```
 ❌ Connection test failed: Unauthorized
 ```
 
-**Solution:**
-- Check token is correct
-- Ensure no extra spaces
-- Token format: `123456:ABC-DEF...`
+**Решение:**
+- Проверьте, что токен правильный
+- Убедитесь, что нет лишних пробелов
+- Формат токена: `123456:ABC-DEF...`
 
 ---
 
-### Error: Invalid chat ID
+### Ошибка: Неверный chat ID
 
 ```
 ❌ Failed to send message: Bad Request: chat not found
 ```
 
-**Solution:**
-- Verify chat ID is correct
-- For groups, ensure ID starts with `-`
-- Bot must be added to the group/channel
+**Решение:**
+- Проверьте, что chat ID правильный
+- Для групп убедитесь, что ID начинается с `-`
+- Бот должен быть добавлен в группу/канал
 
 ---
 
-### Error: Network timeout
+### Ошибка: Network timeout
 
 ```
 ❌ Failed to send message: Request timeout after 10s
 ```
 
-**Solution:**
-- Check internet connection
-- Increase timeout: `--timeout 30`
+**Решение:**
+- Проверьте интернет-соединение
+- Увеличьте таймаут: `--timeout 30`
 
 ---
 
-## Message Limits
+## Лимиты сообщений
 
-- **Maximum message length:** 4096 characters
-- **Files longer than 4096 chars:** Will be rejected by Telegram API
-- **Solution:** Split large files into chunks (future feature)
+- **Максимальная длина сообщения:** 4096 символов
+- **Файлы длиннее 4096 символов:** Будут отклонены Telegram API
+- **Решение:** Разделение больших файлов на части (будущая функция)
 
 ---
 
-## Architecture
+## Архитектура
 
 ```
 src/telegram/
-├── file_reader.py          # File reading + validation
-├── telegram_client.py      # Telegram Bot API client
-└── telegram_sender.py      # CLI entry point
+├── file_reader.py          # Чтение файлов + валидация
+├── telegram_client.py      # Клиент Telegram Bot API
+└── telegram_sender.py      # CLI точка входа
 ```
 
-**Design principles:**
-- Separation of concerns (reading vs sending)
-- Session reuse (HTTP connection pooling)
-- Context manager support (`with` statement)
-- Comprehensive error handling
-- Timeout protection
-- Logging at every step
+**Принципы дизайна:**
+- Разделение ответственности (чтение vs отправка)
+- Переиспользование сессий (HTTP connection pooling)
+- Поддержка контекстного менеджера (`with`)
+- Комплексная обработка ошибок
+- Защита от таймаутов
+- Логирование на каждом шаге
 
 ---
 
-## Advanced: Sending to Multiple Chats
+## Продвинутое использование: Отправка в несколько чатов
 
-**Create script `send_to_multiple.sh`:**
+**Создайте скрипт `send_to_multiple.sh`:**
 ```bash
 #!/bin/bash
 
@@ -311,73 +311,73 @@ done
 
 ---
 
-## Security Best Practices
+## Лучшие практики безопасности
 
-1. **Never commit bot tokens to git:**
+1. **Никогда не коммитьте токены ботов в git:**
    ```bash
-   # Add to .gitignore
+   # Добавьте в .gitignore
    echo "*.env" >> .gitignore
    echo ".env" >> .gitignore
    ```
 
-2. **Use environment variables:**
+2. **Используйте переменные окружения:**
    ```bash
-   # Create .env file (don't commit!)
+   # Создайте .env файл (не коммитьте!)
    echo 'export TELEGRAM_BOT_TOKEN="..."' > .env
    echo 'export TELEGRAM_CHAT_ID="..."' >> .env
 
-   # Load when needed
+   # Загрузите при необходимости
    source .env
    ```
 
-3. **Rotate tokens regularly:**
-   - Use @BotFather `/revoke` command
-   - Generate new token
+3. **Регулярно ротируйте токены:**
+   - Используйте команду @BotFather `/revoke`
+   - Сгенерируйте новый токен
 
 ---
 
-## Troubleshooting
+## Решение проблем
 
-### Bot doesn't respond in group
+### Бот не отвечает в группе
 
-**Problem:** Bot added to group but not receiving messages
+**Проблема:** Бот добавлен в группу, но не получает сообщения
 
-**Solution:**
-1. Make bot admin (or disable privacy mode)
-2. In @BotFather: `/mybots` → Select bot → Bot Settings → Group Privacy → Turn OFF
+**Решение:**
+1. Сделайте бота админом (или отключите privacy mode)
+2. В @BotFather: `/mybots` → Выберите бота → Bot Settings → Group Privacy → Turn OFF
 
 ---
 
 ### "Forbidden: bot was blocked by the user"
 
-**Problem:** User blocked the bot
+**Проблема:** Пользователь заблокировал бота
 
-**Solution:** Ask user to unblock and restart bot (`/start`)
+**Решение:** Попросите пользователя разблокировать и перезапустить бота (`/start`)
 
 ---
 
 ### Rate limiting
 
-**Problem:** Too many requests
+**Проблема:** Слишком много запросов
 
-**Solution:**
-- Telegram allows ~30 messages/second to different chats
-- Add delay between messages: `sleep 0.1`
+**Решение:**
+- Telegram разрешает ~30 сообщений/секунду в разные чаты
+- Добавьте задержку между сообщениями: `sleep 0.1`
 
 ---
 
-## Logging
+## Логирование
 
-Logs are written to console with INFO/ERROR levels.
+Логи записываются в консоль с уровнями INFO/ERROR.
 
-**Enable DEBUG logging:**
+**Включение DEBUG логирования:**
 
-Edit `config.py`:
+Отредактируйте `config.py`:
 ```python
-LOG_LEVEL = "DEBUG"  # Instead of INFO
+LOG_LEVEL = "DEBUG"  # Вместо INFO
 ```
 
-**Debug output example:**
+**Пример DEBUG вывода:**
 ```
 DEBUG - Testing bot token with getMe
 DEBUG - Sending message to chat 123456789 (length: 54 chars)
@@ -386,62 +386,62 @@ INFO - Message sent successfully to chat 123456789
 
 ---
 
-## Future Enhancements (Extensibility)
+## Будущие улучшения (расширяемость)
 
-The code is designed to be easily extended:
+Код спроектирован для лёгкого расширения:
 
-1. **Add file attachments:**
+1. **Добавить вложения файлов:**
    ```python
-   # In telegram_client.py
+   # В telegram_client.py
    def send_document(self, chat_id: str, file_path: str):
-       # Implementation
+       # Реализация
    ```
 
-2. **Add message chunking (for long files):**
+2. **Добавить разделение сообщений (для длинных файлов):**
    ```python
-   # In file_reader.py
+   # В file_reader.py
    def chunk_text(text: str, max_length: int = 4096):
-       # Implementation
+       # Реализация
    ```
 
-3. **Add retry logic:**
+3. **Добавить логику повторов:**
    ```python
-   # In telegram_client.py
+   # В telegram_client.py
    def send_message_with_retry(self, chat_id: str, text: str, retries: int = 3):
-       # Implementation
+       # Реализация
    ```
 
-4. **Add message formatting:**
+4. **Добавить форматирование сообщений:**
    ```python
-   # In telegram_client.py
+   # В telegram_client.py
    def send_formatted_message(self, chat_id: str, text: str, bold: bool = False):
-       # Implementation
+       # Реализация
    ```
 
 ---
 
-## Complete Example
+## Полный пример
 
 ```bash
-# 1. Install
+# 1. Установка
 pip3 install -r requirements.txt
 
-# 2. Create message
+# 2. Создание сообщения
 echo "Hello from Telegram Bot!" > test_message.txt
 
-# 3. Test bot token
+# 3. Тест токена бота
 python3 -m src.telegram.telegram_sender \
   --test \
   --token "123456:ABC-DEF..."
 
-# 4. Send message
+# 4. Отправка сообщения
 python3 -m src.telegram.telegram_sender \
   --file test_message.txt \
   --token "123456:ABC-DEF..." \
   --chat "123456789"
 ```
 
-**Success output:**
+**Успешный вывод:**
 ```
 ✅ Bot token is valid. Connection test successful.
 ✅ Message sent successfully to chat 123456789
@@ -451,20 +451,20 @@ python3 -m src.telegram.telegram_sender \
 
 ---
 
-## API Reference
+## Справочник API
 
-### Telegram Bot API Endpoints Used
+### Используемые endpoint'ы Telegram Bot API
 
-- `POST /bot<token>/sendMessage` — Send text message
-- `GET /bot<token>/getMe` — Test bot token
+- `POST /bot<token>/sendMessage` — Отправка текстового сообщения
+- `GET /bot<token>/getMe` — Тест токена бота
 
-**Official Documentation:** https://core.telegram.org/bots/api
+**Официальная документация:** https://core.telegram.org/bots/api
 
 ---
 
-## Support
+## Поддержка
 
-For Telegram-specific issues:
-- Official Bot Documentation: https://core.telegram.org/bots
-- Bot Support: @BotSupport (Telegram)
-- API Updates: @BotNews (Telegram)
+По вопросам, связанным с Telegram:
+- Официальная документация ботов: https://core.telegram.org/bots
+- Поддержка ботов: @BotSupport (Telegram)
+- Обновления API: @BotNews (Telegram)
