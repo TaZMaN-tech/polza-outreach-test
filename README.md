@@ -307,9 +307,3 @@ python -m src.telegram.telegram_sender --test --token "123456:ABC-DEF..."
 - **MCP:** Интеграция GitHub, Filesystem, Figma, Browser
 - **Топ правила:** Small diffs (<300 LOC), Verify by running, No duplicate logic
 - **Контроль качества:** Пошаговое планирование, security чек-листы, тестирование edge cases
-
----
-
-## Лицензия
-
-MIT License
