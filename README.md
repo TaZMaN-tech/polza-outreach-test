@@ -1,68 +1,68 @@
-# Email Verification & Telegram Tools
+# Инструменты проверки Email и отправки в Telegram
 
-Production-ready Python tools for email verification and Telegram messaging.
+Production-ready Python инструменты для проверки email и отправки сообщений в Telegram.
 
-## Projects
+## Проекты
 
-1. **Email Verification Tool** (Task 1) — DNS MX lookup + SMTP handshake verification
-2. **Telegram Sender** (Task 2) — Send text files to Telegram via Bot API
+1. **Инструмент проверки Email** (Задача 1) — DNS MX lookup + SMTP handshake проверка
+2. **Telegram Sender** (Задача 2) — Отправка текстовых файлов в Telegram через Bot API
 
 ---
 
-# Task 1: Email Verification Tool
+# Задача 1: Инструмент проверки Email
 
-Production-ready Python tool for email verification using DNS MX records and SMTP handshake validation.
+Production-ready Python инструмент для проверки email с использованием DNS MX записей и SMTP handshake валидации.
 
-## Features
+## Возможности
 
-- **Email format validation** — RFC 5322 compliant regex validation
-- **DNS MX record lookup** — Verifies domain and extracts MX servers
-- **SMTP handshake verification** — Performs EHLO → MAIL FROM → RCPT TO without sending emails
-- **In-memory MX caching** — Caches MX records by domain for performance
-- **Timeout protection** — Network operations have configurable timeouts
-- **Graceful error handling** — All exceptions caught and logged
-- **Multiple input methods** — CLI arguments or file input
-- **JSON export** — Optional JSON output for automation
+- **Валидация формата email** — Проверка по RFC 5322 через regex
+- **DNS MX record lookup** — Проверка домена и извлечение MX серверов
+- **SMTP handshake проверка** — Выполнение EHLO → MAIL FROM → RCPT TO без отправки писем
+- **In-memory MX кеширование** — Кеширование MX записей по доменам для производительности
+- **Защита от зависания** — Настраиваемые таймауты для всех сетевых операций
+- **Обработка ошибок** — Все исключения перехватываются и логируются
+- **Несколько методов ввода** — CLI аргументы или файл
+- **JSON экспорт** — Опциональный JSON вывод для автоматизации
 
-## Installation
+## Установка
 
-### Prerequisites
+### Требования
 
 - Python 3.11+
 - pip
 
-### Setup
+### Настройка
 
 ```bash
-# Clone or navigate to project directory
+# Перейдите в директорию проекта
 cd polza_outreach_test
 
-# Install dependencies
+# Установите зависимости
 pip install -r requirements.txt
 ```
 
-## Usage
+## Использование
 
-### Basic Usage
+### Базовое использование
 
-**Verify emails from command line:**
+**Проверка email из командной строки:**
 ```bash
 python -m src.main --emails "test@example.com,user@gmail.com"
 ```
 
-**Verify emails from file:**
+**Проверка email из файла:**
 ```bash
 python -m src.main --file emails.txt
 ```
 
-**Save results to JSON:**
+**Сохранение результатов в JSON:**
 ```bash
 python -m src.main --emails "test@example.com" --json output.json
 ```
 
-### Input File Format
+### Формат входного файла
 
-Create a text file with one email per line:
+Создайте текстовый файл с одним email на строку:
 
 ```text
 test@example.com
@@ -70,12 +70,12 @@ user@gmail.com
 admin@domain.org
 ```
 
-### Output
+### Вывод
 
-**Console output:**
+**Консольный вывод:**
 ```
 ================================================================================
-EMAIL VERIFICATION RESULTS
+РЕЗУЛЬТАТЫ ПРОВЕРКИ EMAIL
 ================================================================================
 
 1. Email: test@gmail.com
@@ -104,7 +104,7 @@ EMAIL VERIFICATION RESULTS
 ================================================================================
 ```
 
-**JSON output** (if `--json` specified):
+**JSON вывод** (если указан `--json`):
 ```json
 {
   "total": 3,
@@ -140,124 +140,124 @@ EMAIL VERIFICATION RESULTS
 }
 ```
 
-## Verification Statuses
+## Статусы проверки
 
-### Console Output (as per TZ requirements)
+### Консольный вывод (согласно ТЗ)
 
-**TZ specifies ONLY 3 possible statuses:**
+**ТЗ указывает ТОЛЬКО 3 возможных статуса:**
 
-| Status | Description | When shown |
-|--------|-------------|------------|
-| **домен валиден** | Domain is valid (has DNS records and MX records) | Domain exists + MX records found |
-| **домен отсутствует** | Domain does not exist | Domain not found OR invalid email format |
-| **MX-записи отсутствуют или некорректны** | MX records are missing or incorrect | Domain exists but no MX records |
+| Статус | Описание | Когда показывается |
+|--------|----------|-------------------|
+| **домен валиден** | Домен валиден (имеет DNS записи и MX записи) | Домен существует + найдены MX записи |
+| **домен отсутствует** | Домен не существует | Домен не найден ИЛИ неверный формат email |
+| **MX-записи отсутствуют или некорректны** | MX записи отсутствуют или некорректны | Домен существует, но нет MX записей |
 
-**Note:** Invalid email format is shown as "домен отсутствует" (per TZ). Details appear in Error field.
+**Примечание:** Неверный формат email показывается как "домен отсутствует" (согласно ТЗ). Детали в поле Error.
 
-### SMTP Status (separate field)
+### SMTP статус (отдельное поле)
 
-| SMTP Status | Description |
-|-------------|-------------|
-| **verified** | SMTP server accepted the email (250 response) |
-| **rejected** | SMTP server rejected the email (550 response) |
-| **unavailable** | SMTP server unreachable/timeout/blocked |
-| **not checked** | SMTP verification was not performed |
+| SMTP статус | Описание |
+|-------------|----------|
+| **verified** | SMTP сервер принял email (ответ 250) |
+| **rejected** | SMTP сервер отклонил email (ответ 550) |
+| **unavailable** | SMTP сервер недоступен/таймаут/заблокирован |
+| **not checked** | SMTP проверка не выполнялась |
 
-### JSON Output Statuses (extended)
+### JSON статусы (расширенные)
 
-| Status | Description |
-|--------|-------------|
-| **valid** | Email passed all checks (format, DNS, SMTP) |
-| **invalid_format** | Email format is incorrect |
-| **domain_not_found** | Domain does not exist in DNS |
-| **no_mx_records** | MX records are missing or incorrect |
-| **smtp_unavailable** | SMTP server is unreachable or blocked |
-| **smtp_rejected** | SMTP server rejected the email address |
+| Статус | Описание |
+|--------|----------|
+| **valid** | Email прошел все проверки (формат, DNS, SMTP) |
+| **invalid_format** | Неверный формат email |
+| **domain_not_found** | Домен не существует в DNS |
+| **no_mx_records** | MX записи отсутствуют или некорректны |
+| **smtp_unavailable** | SMTP сервер недоступен или заблокирован |
+| **smtp_rejected** | SMTP сервер отклонил email адрес |
 
-## Configuration
+## Конфигурация
 
-Edit `config.py` to customize settings:
+Отредактируйте `config.py` для настройки:
 
 ```python
-# SMTP Configuration
-SMTP_TIMEOUT = 10  # seconds
+# SMTP конфигурация
+SMTP_TIMEOUT = 10  # секунды
 SMTP_PORT = 25
 SMTP_FROM_EMAIL = "verify@example.com"
 
-# DNS Configuration
-DNS_TIMEOUT = 5  # seconds
-DNS_NAMESERVERS = None  # or ['8.8.8.8', '8.8.4.4']
+# DNS конфигурация
+DNS_TIMEOUT = 5  # секунды
+DNS_NAMESERVERS = None  # или ['8.8.8.8', '8.8.4.4']
 
-# Logging
+# Логирование
 LOG_LEVEL = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 
-# Cache
+# Кеш
 ENABLE_MX_CACHE = True
 ```
 
-## Architecture
+## Архитектура
 
 ```
 src/
-├── main.py                    # CLI entry point, orchestration
+├── main.py                    # CLI точка входа, оркестрация
 ├── validators/
-│   └── email_validator.py     # Email format validation & domain extraction
+│   └── email_validator.py     # Валидация формата email и извлечение домена
 ├── dns/
-│   └── mx_checker.py          # MX record lookup with caching
+│   └── mx_checker.py          # MX record lookup с кешированием
 ├── smtp/
-│   └── smtp_verifier.py       # SMTP handshake verification
+│   └── smtp_verifier.py       # SMTP handshake проверка
 ├── models/
-│   └── result.py              # Data models (VerificationResult, statuses)
+│   └── result.py              # Модели данных (VerificationResult, статусы)
 └── utils/
-    └── logger.py              # Logging configuration
+    └── logger.py              # Конфигурация логирования
 ```
 
-## How It Works
+## Как это работает
 
-1. **Format Validation** — Validates email using RFC 5322 regex
-2. **Domain Extraction** — Extracts domain from email address
-3. **Domain Existence Check** — Verifies domain exists in DNS (A/AAAA records)
-4. **MX Lookup** — Retrieves and caches MX records for the domain
-5. **SMTP Handshake** — Connects to MX server and performs:
-   - `EHLO` — Identify to server
-   - `MAIL FROM` — Set sender
-   - `RCPT TO` — Verify recipient
-   - Analyzes response codes (250 = valid, 550 = rejected)
-6. **Graceful Cleanup** — Always closes SMTP connections properly
+1. **Валидация формата** — Проверка email по RFC 5322 regex
+2. **Извлечение домена** — Извлечение домена из email адреса
+3. **Проверка существования домена** — Проверка существования домена в DNS (A/AAAA записи)
+4. **MX Lookup** — Получение и кеширование MX записей для домена
+5. **SMTP Handshake** — Подключение к MX серверу и выполнение:
+   - `EHLO` — Идентификация к серверу
+   - `MAIL FROM` — Установка отправителя
+   - `RCPT TO` — Проверка получателя
+   - Анализ кодов ответа (250 = валиден, 550 = отклонен)
+6. **Graceful Cleanup** — Всегда корректно закрывает SMTP соединения
 
-## Error Handling
+## Обработка ошибок
 
-- All network operations have timeouts (DNS: 5s, SMTP: 10s)
-- Exceptions are caught at every layer
-- SMTP connections are always closed (try-finally)
-- Fallback mechanism tries multiple MX servers
-- Detailed error logging for debugging
+- Все сетевые операции имеют таймауты (DNS: 5с, SMTP: 10с)
+- Исключения перехватываются на каждом уровне
+- SMTP соединения всегда закрываются (try-finally)
+- Механизм fallback пробует несколько MX серверов
+- Детальное логирование ошибок для отладки
 
-## Limitations
+## Ограничения
 
-- Some mail servers use greylisting or block verification attempts
-- Corporate firewalls may block outbound port 25 (SMTP)
-- Catch-all domains may accept any email address
-- Rate limiting may occur with bulk verification
+- Некоторые почтовые серверы используют greylisting или блокируют попытки проверки
+- Корпоративные файрволы могут блокировать исходящий порт 25 (SMTP)
+- Catch-all домены могут принимать любой email адрес
+- При массовой проверке может возникнуть rate limiting
 
-## Testing Examples
+## Примеры тестирования
 
-See examples below for testing the tool.
+См. примеры ниже для тестирования инструмента.
 
 ---
 
-# Task 2: Telegram Sender
+# Задача 2: Telegram Sender
 
-Send text files to Telegram chats via Bot API.
+Отправка текстовых файлов в Telegram чаты через Bot API.
 
-## Quick Start
+## Быстрый старт
 
-**Installation:**
+**Установка:**
 ```bash
 pip install -r requirements.txt
 ```
 
-**Usage (with CLI arguments):**
+**Использование (с CLI аргументами):**
 ```bash
 python -m src.telegram.telegram_sender \
   --file message.txt \
@@ -265,51 +265,51 @@ python -m src.telegram.telegram_sender \
   --chat "123456789"
 ```
 
-**Usage (with environment variables - recommended):**
+**Использование (с переменными окружения - рекомендуется):**
 ```bash
 export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
 export TELEGRAM_CHAT_ID="123456789"
 python -m src.telegram.telegram_sender --file message.txt
 ```
 
-**Test bot token:**
+**Проверка bot token:**
 ```bash
 python -m src.telegram.telegram_sender --test --token "123456:ABC-DEF..."
 ```
 
-**Full Documentation:** See [README_TELEGRAM.md](README_TELEGRAM.md)
+**Полная документация:** См. [README_TELEGRAM.md](README_TELEGRAM.md)
 
 ---
 
-# Task 3: System Architecture
+# Задача 3: Архитектура системы
 
-Email outreach system architecture for 1200 accounts (multi-client, high availability, minimal cost).
+Архитектура email outreach системы для 1200 аккаунтов (мульти-клиент, высокая доступность, минимальная стоимость).
 
-**Document:** [TASK3_ARCHITECTURE.md](TASK3_ARCHITECTURE.md)
+**Документ:** [TASK3_ARCHITECTURE.md](TASK3_ARCHITECTURE.md)
 
-**Key Points:**
-- Infrastructure: 3 VPS nodes ($48/mo) + SMTP accounts ($60/mo)
-- SMTP Pool: 15-20 accounts across 3-4 providers (rotation + health checks)
-- Queue: Redis + Celery (rate limiting 100/min system-wide)
-- Monitoring: Prometheus + Grafana + blacklist checks
-- Total Cost: **$118-168/mo**
-
----
-
-# Task 4: AI Development Stack
-
-Personal AI workflow for daily development (Claude, ChatGPT, Copilot).
-
-**Document:** [TASK4_AI_STACK.md](TASK4_AI_STACK.md)
-
-**Key Points:**
-- **Workflow:** Claude for architecture → ChatGPT for fixes → Copilot for autocomplete
-- **MCP:** GitHub, Filesystem, Figma, Browser integration
-- **Top Rules:** Small diffs (<300 LOC), Verify by running, No duplicate logic
-- **Quality Control:** Step-by-step planning, security checklists, test edge cases
+**Ключевые моменты:**
+- Инфраструктура: 3 VPS ноды ($48/мес) + SMTP аккаунты ($60/мес)
+- SMTP пул: 15-20 аккаунтов у 3-4 провайдеров (ротация + health checks)
+- Очередь: Redis + Celery (rate limiting 100/мин на всю систему)
+- Мониторинг: Prometheus + Grafana + проверка blacklist
+- Общая стоимость: **$118-168/мес**
 
 ---
 
-## License
+# Задача 4: AI Development Stack
+
+Персональный AI workflow для ежедневной разработки (Claude, ChatGPT, Copilot).
+
+**Документ:** [TASK4_AI_STACK.md](TASK4_AI_STACK.md)
+
+**Ключевые моменты:**
+- **Workflow:** Claude для архитектуры → ChatGPT для правок → Copilot для автодополнения
+- **MCP:** Интеграция GitHub, Filesystem, Figma, Browser
+- **Топ правила:** Small diffs (<300 LOC), Verify by running, No duplicate logic
+- **Контроль качества:** Пошаговое планирование, security чек-листы, тестирование edge cases
+
+---
+
+## Лицензия
 
 MIT License
