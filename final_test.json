@@ -1,0 +1,55 @@
+{
+  "total": 4,
+  "results": [
+    {
+      "email": "test@gmail.com",
+      "status": "smtp_unavailable",
+      "smtp_status": "unavailable",
+      "domain": "gmail.com",
+      "mx_records": [
+        "gmail-smtp-in.l.google.com",
+        "alt1.gmail-smtp-in.l.google.com",
+        "alt2.gmail-smtp-in.l.google.com",
+        "alt3.gmail-smtp-in.l.google.com",
+        "alt4.gmail-smtp-in.l.google.com"
+      ],
+      "smtp_response": null,
+      "error_message": "SMTP verification failed on all 5 MX host(s). Last error: SMTP connection timeout to alt4.gmail-smtp-in.l.google.com"
+    },
+    {
+      "email": "support@github.com",
+      "status": "smtp_unavailable",
+      "smtp_status": "unavailable",
+      "domain": "github.com",
+      "mx_records": [
+        "aspmx.l.google.com",
+        "alt1.aspmx.l.google.com",
+        "alt2.aspmx.l.google.com",
+        "alt3.aspmx.l.google.com",
+        "alt4.aspmx.l.google.com"
+      ],
+      "smtp_response": null,
+      "error_message": "SMTP verification failed on all 5 MX host(s). Last error: SMTP connection timeout to alt4.aspmx.l.google.com"
+    },
+    {
+      "email": "invalid@nonexistentdomain99999.com",
+      "status": "domain_not_found",
+      "smtp_status": "not_checked",
+      "domain": "nonexistentdomain99999.com",
+      "mx_records": null,
+      "smtp_response": null,
+      "error_message": "Domain does not exist in DNS"
+    },
+    {
+      "email": "admin@example.com",
+      "status": "smtp_unavailable",
+      "smtp_status": "unavailable",
+      "domain": "example.com",
+      "mx_records": [
+        ""
+      ],
+      "smtp_response": null,
+      "error_message": "SMTP verification failed on all 1 MX host(s). Last error: SMTP connection refused by "
+    }
+  ]
+}
