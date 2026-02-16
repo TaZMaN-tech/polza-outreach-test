@@ -1,76 +1,76 @@
-# Email Outreach System Architecture
+# Архитектура системы Email Outreach
 
-**Target:** 1200 email accounts, multi-client, minimal infrastructure cost, high availability
+**Цель:** 1200 email аккаунтов, мульти-клиент, минимальная стоимость инфраструктуры, высокая доступность
 
 ---
 
-## 1. System Components
+## 1. Компоненты системы
 
 ```
 ┌─────────────────┐
-│   API Gateway   │ ← Client requests (REST/GraphQL)
+│   API Gateway   │ ← Клиентские запросы (REST/GraphQL)
 └────────┬────────┘
          │
 ┌────────▼────────┐
-│  Queue Manager  │ ← Redis (task queue, rate limiting)
+│  Queue Manager  │ ← Redis (очередь задач, rate limiting)
 └────────┬────────┘
          │
 ┌────────▼────────────────────┐
-│   Worker Pool (3-5 nodes)   │ ← Python workers (send emails)
+│   Worker Pool (3-5 нод)     │ ← Python workers (отправка писем)
 └────────┬────────────────────┘
          │
 ┌────────▼────────┐
-│  SMTP Rotator   │ ← 15-20 SMTP accounts (rotation logic)
+│  SMTP Rotator   │ ← 15-20 SMTP аккаунтов (логика ротации)
 └────────┬────────┘
          │
 ┌────────▼────────┐
 │  External SMTP  │ ← Gmail Workspace, SendGrid, SMTP2GO
 └─────────────────┘
 
-Monitoring: Prometheus + Grafana + Sentry
-Storage: PostgreSQL (campaigns, stats, deliverability)
+Мониторинг: Prometheus + Grafana + Sentry
+Хранилище: PostgreSQL (кампании, статистика, доставляемость)
 ```
 
 ---
 
-## 2. Infrastructure
+## 2. Инфраструктура
 
-**Hosting:** DigitalOcean/Hetzner VPS (3 nodes)
-- **Node 1:** API + PostgreSQL + Redis (4GB RAM, 2 vCPU) — $24/mo
-- **Node 2-3:** Workers (2GB RAM, 1 vCPU each) — $12/mo × 2 = $24/mo
+**Хостинг:** DigitalOcean/Hetzner VPS (3 ноды)
+- **Нода 1:** API + PostgreSQL + Redis (4GB RAM, 2 vCPU) — $24/мес
+- **Ноды 2-3:** Workers (2GB RAM, 1 vCPU каждая) — $12/мес × 2 = $24/мес
 
-**Containerization:** Docker Compose (orchestration overkill for this scale)
-- API container (FastAPI/Flask)
-- Worker containers (Python + Celery)
-- Redis container
-- PostgreSQL container
+**Контейнеризация:** Docker Compose (оркестрация избыточна для такого масштаба)
+- API контейнер (FastAPI/Flask)
+- Worker контейнеры (Python + Celery)
+- Redis контейнер
+- PostgreSQL контейнер
 
-**Deployment:** GitLab CI/CD → SSH deploy (no k8s needed)
+**Развёртывание:** GitLab CI/CD → SSH deploy (k8s не нужен)
 
 ---
 
-## 3. SMTP Account Pool
+## 3. Пул SMTP аккаунтов
 
-**Strategy:** 15-20 accounts across 3-4 providers to distribute risk
+**Стратегия:** 15-20 аккаунтов у 3-4 провайдеров для распределения рисков
 
-### Provider Mix
-- **Gmail Workspace:** 5 accounts ($6/user/mo × 5 = $30/mo)
-  - Limit: 500 emails/day per account → 2,500/day total
-  - Reputation: Excellent (Google IP pool)
+### Микс провайдеров
+- **Gmail Workspace:** 5 аккаунтов ($6/пользователь/мес × 5 = $30/мес)
+  - Лимит: 500 писем/день на аккаунт → 2,500/день всего
+  - Репутация: Отличная (IP пул Google)
 
-- **SendGrid API:** Free tier + Paid ($20/mo)
-  - Limit: 100/day free, then $0.0006/email
-  - Use for transactional/high-priority
+- **SendGrid API:** Бесплатный тариф + Платный ($20/мес)
+  - Лимит: 100/день бесплатно, далее $0.0006/письмо
+  - Использование для транзакционных/высокоприоритетных
 
-- **SMTP2GO/Mailgun:** 5 accounts ($10/mo total)
-  - Limit: 1,000/day per account → 5,000/day
-  - Fallback pool
+- **SMTP2GO/Mailgun:** 5 аккаунтов ($10/мес всего)
+  - Лимит: 1,000/день на аккаунт → 5,000/день
+  - Резервный пул
 
-- **Custom SMTP (if budget allows):** 5 accounts on separate VPS
-  - VPS with Postfix: $6/mo
-  - 5 different /24 IPs via proxy rotation
+- **Кастомный SMTP (если бюджет позволяет):** 5 аккаунтов на отдельном VPS
+  - VPS с Postfix: $6/мес
+  - 5 разных /24 IP через ротацию прокси
 
-### Rotation Logic
+### Логика ротации
 ```python
 # Round-robin with health check
 accounts = [acc for acc in smtp_pool if acc.is_healthy()]
@@ -81,196 +81,196 @@ if account.today_sent >= account.daily_limit * 0.9:
     account = get_next_available()
 ```
 
-### Domain Setup
-- **5 domains:** $12/year × 5 = $5/mo
+### Настройка доменов
+- **5 доменов:** $12/год × 5 = $5/мес
 - SPF: `v=spf1 include:_spf.google.com include:sendgrid.net ~all`
-- DKIM: Rotate keys every 3 months
-- DMARC: `v=DMARC1; p=none; rua=mailto:dmarc@domain.com` (monitor first)
+- DKIM: Ротация ключей каждые 3 месяца
+- DMARC: `v=DMARC1; p=none; rua=mailto:dmarc@domain.com` (сначала мониторинг)
 
 ---
 
-## 4. Queue & Rate Limiting
+## 4. Очередь и Rate Limiting
 
-**Queue:** Redis + Celery
+**Очередь:** Redis + Celery
 ```python
-# Campaign task
-@celery.task(rate_limit='100/m')  # 100 emails/min system-wide
+# Задача кампании
+@celery.task(rate_limit='100/m')  # 100 писем/мин на всю систему
 def send_email(recipient, template, smtp_account_id):
     account = get_smtp_account(smtp_account_id)
 
-    # Per-account rate limiting
-    if account.minute_sent >= 10:  # 10/min per account
+    # Rate limiting по аккаунтам
+    if account.minute_sent >= 10:  # 10/мин на аккаунт
         raise Retry(countdown=60)
 
     send_via_smtp(account, recipient, template)
 ```
 
-**Rate Limits (to avoid spam flags):**
-- **System-wide:** 100 emails/min
-- **Per account:** 10 emails/min, 500/day (for Gmail)
-- **Per domain:** 50 emails/day (target domain protection)
-- **Per recipient domain:** Max 20 emails/day (e.g., @company.com)
+**Rate Limits (чтобы избежать спам-флагов):**
+- **На всю систему:** 100 писем/мин
+- **На аккаунт:** 10 писем/мин, 500/день (для Gmail)
+- **На домен:** 50 писем/день (защита целевого домена)
+- **На домен получателя:** Макс 20 писем/день (например, @company.com)
 
-**Backoff Strategy:**
-- Failed send → retry after 5min, 15min, 1hr
-- 3 failures → pause account for 24hrs
-- 5XX errors → immediate fallback to next account
-
----
-
-## 5. Monitoring
-
-**Metrics (Prometheus):**
-- Emails sent/failed per account (last 1h, 24h)
-- Queue depth, worker utilization
-- SMTP response codes (2XX, 4XX, 5XX)
-- Delivery rate per domain
-- Bounce rate per campaign
-
-**Alerts (AlertManager → Telegram):**
-- Account daily limit >80% → switch to backup
-- Bounce rate >10% → pause campaign
-- SMTP 5XX errors >5/min → health check account
-- Worker down >5min → restart container
-
-**Logging (ELK or Loki):**
-- Structured logs: `{account_id, recipient_domain, smtp_code, timestamp}`
-- Retention: 30 days
-
-**Blacklist Monitoring:**
-- Daily check: MXToolbox API ($50/mo) or self-hosted script
-- Check all sending IPs against Spamhaus, SpamCop, Barracuda
+**Стратегия backoff:**
+- Неудачная отправка → повтор через 5мин, 15мин, 1ч
+- 3 неудачи → пауза аккаунта на 24ч
+- 5XX ошибки → немедленный переход на следующий аккаунт
 
 ---
 
-## 6. Fault Tolerance
+## 5. Мониторинг
 
-### SMTP Account Failure
-```
-Account blocked → Mark unhealthy → Route to backup pool
-Health check every 30min (test send to own address)
-Auto-recover after 24hrs if health check passes
-```
+**Метрики (Prometheus):**
+- Отправлено/не отправлено писем на аккаунт (за 1ч, 24ч)
+- Глубина очереди, утилизация worker'ов
+- SMTP коды ответов (2XX, 4XX, 5XX)
+- Процент доставки по доменам
+- Bounce rate по кампаниям
 
-### Domain Reputation Drop
-```
-Bounce rate spike → Pause domain → Switch to backup domain
-DMARC reports show failures → Fix SPF/DKIM immediately
-```
+**Алерты (AlertManager → Telegram):**
+- Дневной лимит аккаунта >80% → переключение на резервный
+- Bounce rate >10% → пауза кампании
+- SMTP 5XX ошибки >5/мин → health check аккаунта
+- Worker недоступен >5мин → перезапуск контейнера
 
-### Worker/Server Failure
-```
-Node down → Celery tasks requeue automatically (Redis persistent)
-PostgreSQL down → Read replica on Node 2 (async replication)
-Redis down → Worker crashes graceful, restart with backlog
-```
+**Логирование (ELK или Loki):**
+- Структурированные логи: `{account_id, recipient_domain, smtp_code, timestamp}`
+- Хранение: 30 дней
 
-**Backup Strategy:**
-- PostgreSQL: Daily dump to S3-compatible storage ($5/mo for 50GB)
-- Redis: RDB snapshots every 6hrs
-- Config/secrets: Encrypted in Git repo
+**Мониторинг блеклистов:**
+- Ежедневная проверка: MXToolbox API ($50/мес) или self-hosted скрипт
+- Проверка всех отправляющих IP против Spamhaus, SpamCop, Barracuda
 
 ---
 
-## 7. Risk Mitigation
+## 6. Отказоустойчивость
 
-### Spam Detection
-- **Warm-up:** New accounts start at 50/day, +50/day until limit
-- **Content:** Avoid spam keywords, personalize with {name}/{company}
-- **Unsubscribe link:** Required (legal + deliverability)
-- **Engagement:** Track opens/clicks, remove non-engaged after 3 campaigns
+### Отказ SMTP аккаунта
+```
+Аккаунт заблокирован → Пометить как unhealthy → Переключиться на резервный пул
+Health check каждые 30мин (тестовая отправка на свой адрес)
+Авто-восстановление через 24ч если health check пройден
+```
 
-### Blacklists
-- **Prevention:** Respect bounces, clean lists (verify emails first with Task 1 tool)
-- **Monitoring:** Daily IP/domain checks
-- **Remediation:** Delist requests (manual, 24-48hr turnaround)
+### Падение репутации домена
+```
+Всплеск bounce rate → Пауза домена → Переключение на резервный домен
+DMARC отчёты показывают ошибки → Немедленное исправление SPF/DKIM
+```
+
+### Отказ Worker/Сервера
+```
+Нода недоступна → Celery задачи автоматически возвращаются в очередь (Redis persistent)
+PostgreSQL недоступен → Read replica на ноде 2 (async репликация)
+Redis недоступен → Worker graceful crash, перезапуск с очередью
+```
+
+**Стратегия резервного копирования:**
+- PostgreSQL: Ежедневный дамп в S3-совместимое хранилище ($5/мес за 50GB)
+- Redis: RDB снапшоты каждые 6ч
+- Конфиг/секреты: Зашифровано в Git репозитории
+
+---
+
+## 7. Минимизация рисков
+
+### Детекция спама
+- **Прогрев:** Новые аккаунты начинают с 50/день, +50/день до лимита
+- **Контент:** Избегать спам-слов, персонализация через {name}/{company}
+- **Ссылка отписки:** Обязательна (юридически + доставляемость)
+- **Вовлечённость:** Трекинг открытий/кликов, удаление невовлечённых после 3 кампаний
+
+### Блеклисты
+- **Профилактика:** Учитывать bounces, чистые списки (сначала проверка email инструментом из Задачи 1)
+- **Мониторинг:** Ежедневная проверка IP/доменов
+- **Исправление:** Запросы на удаление из блеклистов (вручную, 24-48ч)
 
 ### DMARC/SPF/DKIM
-- **SPF:** Include all provider IPs (`include:`)
-- **DKIM:** Rotate keys quarterly, 2048-bit
-- **DMARC:** Start `p=none` (monitor), move to `p=quarantine` after 1 month clean reports
+- **SPF:** Включить IP всех провайдеров (`include:`)
+- **DKIM:** Ротация ключей ежеквартально, 2048-бит
+- **DMARC:** Старт с `p=none` (мониторинг), переход на `p=quarantine` через 1 месяц чистых отчётов
 
-### Reputation Management
-- **Separate pools:** Transactional (Gmail) vs. cold outreach (SMTP2GO)
-- **Feedback loops:** Subscribe to provider FBLs (Gmail Postmaster Tools)
-- **List hygiene:** Remove hard bounces immediately, soft bounces after 3 attempts
+### Управление репутацией
+- **Раздельные пулы:** Транзакционные (Gmail) vs. холодный outreach (SMTP2GO)
+- **Feedback loops:** Подписка на FBL провайдеров (Gmail Postmaster Tools)
+- **Гигиена списков:** Удаление hard bounces немедленно, soft bounces после 3 попыток
 
-### Legal Risks
-- **GDPR:** Consent required (opt-in), unsubscribe in 1 click
-- **CAN-SPAM:** Physical address in footer, honor opt-outs within 10 days
-- **Data storage:** EU users → store in EU region (Hetzner Germany)
-
----
-
-## 8. Cost Estimate (Monthly)
-
-| Item | Details | Cost |
-|------|---------|------|
-| **VPS** | 3 nodes (DigitalOcean/Hetzner) | $48 |
-| **PostgreSQL** | Included in VPS | $0 |
-| **Redis** | Included in VPS | $0 |
-| **SMTP Accounts** | 5× Gmail Workspace ($6/user) | $30 |
-| **SMTP Accounts** | SendGrid Paid | $20 |
-| **SMTP Accounts** | SMTP2GO/Mailgun | $10 |
-| **Domains** | 5 domains @ $12/year | $5 |
-| **Monitoring** | Grafana Cloud Free + Sentry Free | $0 |
-| **Backup Storage** | S3-compatible (50GB) | $5 |
-| **Blacklist Check** | MXToolbox API or self-hosted | $0-50 |
-| **SSL Certs** | Let's Encrypt | $0 |
-| **Proxy/IPs (optional)** | Rotating proxies for SMTP | $0-30 |
-| **Total** | Base setup | **$118-168/mo** |
-
-**Scale to 10k emails/day:** +$50/mo (more SMTP accounts, larger VPS)
+### Юридические риски
+- **GDPR:** Требуется согласие (opt-in), отписка в 1 клик
+- **CAN-SPAM:** Физический адрес в футере, обработка opt-out в течение 10 дней
+- **Хранение данных:** Пользователи из ЕС → хранение в регионе ЕС (Hetzner Германия)
 
 ---
 
-## 9. Operational Flow
+## 8. Оценка стоимости (в месяц)
 
-**Campaign Creation:**
+| Позиция | Детали | Стоимость |
+|---------|--------|-----------|
+| **VPS** | 3 ноды (DigitalOcean/Hetzner) | $48 |
+| **PostgreSQL** | Включено в VPS | $0 |
+| **Redis** | Включено в VPS | $0 |
+| **SMTP аккаунты** | 5× Gmail Workspace ($6/пользователь) | $30 |
+| **SMTP аккаунты** | SendGrid платный | $20 |
+| **SMTP аккаунты** | SMTP2GO/Mailgun | $10 |
+| **Домены** | 5 доменов @ $12/год | $5 |
+| **Мониторинг** | Grafana Cloud Free + Sentry Free | $0 |
+| **Резервное хранилище** | S3-совместимое (50GB) | $5 |
+| **Проверка блеклистов** | MXToolbox API или self-hosted | $0-50 |
+| **SSL сертификаты** | Let's Encrypt | $0 |
+| **Прокси/IP (опционально)** | Ротирующие прокси для SMTP | $0-30 |
+| **Итого** | Базовая настройка | **$118-168/мес** |
+
+**Масштабирование до 10k писем/день:** +$50/мес (больше SMTP аккаунтов, более мощный VPS)
+
+---
+
+## 9. Операционный процесс
+
+**Создание кампании:**
 ```
-1. Client → API: Upload CSV, template
-2. API → Validate emails (Task 1 tool), save to PostgreSQL
-3. API → Create Celery tasks (1 per recipient)
-4. Queue → Assign SMTP account (rotation + health check)
-5. Worker → Send email, log result
-6. Retry failed → Exponential backoff
-7. Update stats → PostgreSQL (sent, bounced, opened)
+1. Клиент → API: Загрузка CSV, шаблон
+2. API → Валидация email (инструмент из Задачи 1), сохранение в PostgreSQL
+3. API → Создание Celery задач (1 на получателя)
+4. Очередь → Назначение SMTP аккаунта (ротация + health check)
+5. Worker → Отправка письма, логирование результата
+6. Повтор неудачных → Exponential backoff
+7. Обновление статистики → PostgreSQL (отправлено, bounced, открыто)
 ```
 
-**Daily Maintenance:**
+**Ежедневное обслуживание:**
 ```
-- Health check SMTP accounts (automated)
-- Review DMARC reports (manual, 10min)
-- Check blacklist status (automated alert)
-- Analyze bounce rates per domain (dashboard)
+- Health check SMTP аккаунтов (автоматически)
+- Просмотр DMARC отчётов (вручную, 10мин)
+- Проверка статуса блеклистов (автоматический алерт)
+- Анализ bounce rate по доменам (дашборд)
 ```
 
 ---
 
-## 10. Scaling Path
+## 10. Путь масштабирования
 
-**0-5k emails/day:** Current architecture (3 nodes, 15 accounts)
+**0-5k писем/день:** Текущая архитектура (3 ноды, 15 аккаунтов)
 
-**5k-20k emails/day:**
-- Add 2 worker nodes (+$24/mo)
-- Add 10 more SMTP accounts (+$60/mo)
-- Upgrade Node 1 to 8GB RAM (+$24/mo)
+**5k-20k писем/день:**
+- Добавить 2 worker ноды (+$24/мес)
+- Добавить 10 SMTP аккаунтов (+$60/мес)
+- Апгрейд ноды 1 до 8GB RAM (+$24/мес)
 
-**20k-100k emails/day:**
-- Migrate to managed SMTP (SendGrid $80/mo for 40k)
-- Add Redis Cluster (3 nodes for HA)
-- Horizontal worker scaling (5-10 nodes)
+**20k-100k писем/день:**
+- Миграция на managed SMTP (SendGrid $80/мес за 40k)
+- Добавить Redis Cluster (3 ноды для HA)
+- Горизонтальное масштабирование worker'ов (5-10 нод)
 
 ---
 
-## Summary
+## Итоги
 
-**Philosophy:** Start lean, scale incrementally. Avoid over-engineering (no Kubernetes for 1200 emails/day). Focus on deliverability over throughput—reputation is harder to rebuild than infrastructure.
+**Философия:** Начинать с минимума, масштабировать постепенно. Избегать over-engineering (не нужен Kubernetes для 1200 писем/день). Фокус на доставляемости, а не на throughput — репутацию восстанавливать сложнее, чем инфраструктуру.
 
-**Key Success Metrics:**
-- Delivery rate >95%
+**Ключевые метрики успеха:**
+- Процент доставки >95%
 - Bounce rate <5%
-- Zero blacklist incidents in first 3 months
+- Ноль инцидентов с блеклистами в первые 3 месяца
 - Uptime >99.5%
 
-**Timeline to Production:** 2-3 weeks (1 week dev, 1 week testing/warm-up, 1 week monitoring)
+**Сроки до продакшн:** 2-3 недели (1 неделя разработка, 1 неделя тестирование/прогрев, 1 неделя мониторинг)
